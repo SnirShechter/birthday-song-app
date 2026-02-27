@@ -10,7 +10,6 @@ import { useOrderStore } from "@/stores/order";
 import { Button } from "@/components/ui/Button";
 import { Shell } from "@/components/layout/Shell";
 import { LyricsCarousel } from "@/components/lyrics/LyricsCarousel";
-import { LyricsCard } from "@/components/lyrics/LyricsCard";
 import { LoadingScreen } from "@/components/shared/LoadingScreen";
 import { GradientText } from "@/components/shared/GradientText";
 
@@ -55,7 +54,10 @@ export default function LyricsReview() {
 
   // Fetch lyrics on mount
   useEffect(() => {
-    if (!orderId) return;
+    if (!orderId) {
+      setFetching(false);
+      return;
+    }
     let cancelled = false;
 
     const fetchLyrics = async () => {
@@ -64,10 +66,11 @@ export default function LyricsReview() {
           `/api/orders/${orderId}/lyrics`
         );
         if (!cancelled) {
-          setLyrics(res.lyrics ?? []);
+          setLyrics(res.lyrics ?? res as unknown as LyricsVariation[] ?? []);
           setFetching(false);
         }
-      } catch {
+      } catch (err) {
+        console.error("[LyricsReview] Fetch error:", err);
         if (!cancelled) setFetching(false);
       }
     };
@@ -118,6 +121,13 @@ export default function LyricsReview() {
     },
     [orderId, navigate]
   );
+
+  // Redirect if no order
+  useEffect(() => {
+    if (!fetching && !orderId) {
+      navigate("/create");
+    }
+  }, [fetching, orderId, navigate]);
 
   if (generating) {
     return (
@@ -196,16 +206,12 @@ export default function LyricsReview() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <LyricsCarousel>
-              {lyrics.map((variation) => (
-                <LyricsCard
-                  key={variation.id}
-                  variation={variation}
-                  isSelected={selectedId === variation.id}
-                  onSelect={() => handleSelect(variation.id)}
-                />
-              ))}
-            </LyricsCarousel>
+            <LyricsCarousel
+              variations={lyrics}
+              selectedId={selectedId ?? undefined}
+              onSelect={(id) => handleSelect(id)}
+              onEdit={() => {}}
+            />
           </motion.div>
 
           {/* Refresh button */}
