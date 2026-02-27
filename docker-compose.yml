@@ -40,7 +40,7 @@ services:
         condition: service_healthy
 
   web:
-    image: birthday-song-web:v5
+    image: birthday-song-web:v6
     build:
       context: .
       dockerfile: apps/web/Dockerfile
