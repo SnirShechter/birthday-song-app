@@ -23,8 +23,8 @@ export const sql = postgres(DATABASE_URL, {
   connect_timeout: 10,
   transform: {
     column: {
-      to: postgres.toCamel,
-      from: postgres.fromCamel,
+      to: postgres.fromCamel,
+      from: postgres.toCamel,
     },
   },
 });

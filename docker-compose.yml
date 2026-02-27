@@ -29,7 +29,7 @@ services:
       dockerfile: apps/server/Dockerfile
       target: production
       args:
-        CACHE_BUST: "2026-02-27-v3"
+        CACHE_BUST: "2026-02-27-v4"
     environment:
       DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/birthday_songs
       REDIS_URL: redis://redis:6379
