@@ -16,6 +16,7 @@ RUN pnpm install --frozen-lockfile || pnpm install
 
 # --- Build stage ---
 FROM deps AS build
+ARG CACHE_BUST=1
 COPY packages/shared/ packages/shared/
 COPY apps/server/ apps/server/
 RUN pnpm --filter @birthday-song/shared build 2>/dev/null || true

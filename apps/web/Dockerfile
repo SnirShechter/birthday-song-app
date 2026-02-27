@@ -13,6 +13,7 @@ COPY apps/web/package.json ./apps/web/
 
 RUN pnpm install --frozen-lockfile || pnpm install
 
+ARG CACHE_BUST=1
 COPY packages/shared/ ./packages/shared/
 COPY apps/web/ ./apps/web/
 
