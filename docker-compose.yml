@@ -27,8 +27,9 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
+      target: production
       args:
-        CACHE_BUST: "2026-02-27-v2"
+        CACHE_BUST: "2026-02-27-v3"
     environment:
       DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/birthday_songs
       REDIS_URL: redis://redis:6379
@@ -47,9 +48,10 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      target: production
       args:
         VITE_API_URL: /api
-        CACHE_BUST: "2026-02-27-v2"
+        CACHE_BUST: "2026-02-27-v3"
     depends_on:
       - server
 

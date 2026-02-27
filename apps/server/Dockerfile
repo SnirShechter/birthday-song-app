@@ -22,7 +22,19 @@ COPY apps/server/ apps/server/
 RUN pnpm --filter @birthday-song/shared build 2>/dev/null || true
 RUN pnpm --filter @birthday-song/server build
 
-# --- Production stage ---
+# --- Development stage ---
+FROM deps AS development
+COPY packages/shared/ packages/shared/
+COPY apps/server/ apps/server/
+COPY mock-assets/ mock-assets/
+
+ENV NODE_ENV=development
+ENV PORT=3000
+EXPOSE 3000
+
+CMD ["pnpm", "--filter", "@birthday-song/server", "dev"]
+
+# --- Production stage (must be last for default docker build) ---
 FROM node:22-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
@@ -51,15 +63,3 @@ ENV PORT=3000
 EXPOSE 3000
 
 CMD ["node", "apps/server/dist/index.js"]
-
-# --- Development stage ---
-FROM deps AS development
-COPY packages/shared/ packages/shared/
-COPY apps/server/ apps/server/
-COPY mock-assets/ mock-assets/
-
-ENV NODE_ENV=development
-ENV PORT=3000
-EXPOSE 3000
-
-CMD ["pnpm", "--filter", "@birthday-song/server", "dev"]
