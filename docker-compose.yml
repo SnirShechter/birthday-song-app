@@ -4,9 +4,7 @@ services:
     environment:
       POSTGRES_DB: birthday_songs
       POSTGRES_USER: app
-      POSTGRES_PASSWORD: devpassword
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./apps/server/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
@@ -19,8 +17,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -32,13 +28,11 @@ services:
       context: .
       dockerfile: apps/server/Dockerfile
     environment:
-      DATABASE_URL: postgres://app:devpassword@postgres:5432/birthday_songs
+      DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/birthday_songs
       REDIS_URL: redis://redis:6379
-      PORT: 3000
+      PORT: "3000"
       MOCK_MODE: "true"
-      CORS_ORIGIN: http://localhost:5173
-    ports:
-      - "3000:3000"
+      CORS_ORIGIN: https://birthday.snir.sh
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,10 +45,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    environment:
-      VITE_API_URL: http://localhost:3000
-    ports:
-      - "5173:5173"
+      args:
+        VITE_API_URL: /api
     depends_on:
       - server
 
