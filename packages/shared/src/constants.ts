@@ -40,7 +40,7 @@ export const MUSIC_STYLES: {
     id: 'ballad',
     emoji: '🎹',
     nameEn: 'Ballad',
-    nameHe: 'באלדה',
+    nameHe: 'בלדה',
     descriptionEn: 'Emotional, piano-driven, heartfelt',
     descriptionHe: 'רגשי, פסנתר, מרגש',
     tags: 'emotional ballad, piano driven, heartfelt, soft vocals, string accompaniment, 85 bpm',

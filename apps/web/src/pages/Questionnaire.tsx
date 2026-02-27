@@ -176,10 +176,10 @@ export default function Questionnaire() {
           {step === 1 && (
             <motion.div
               key="step1"
-              initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="mx-auto w-full max-w-lg flex-1 px-4 py-8"
             >
               <div className="mb-8 text-center">
@@ -314,10 +314,10 @@ export default function Questionnaire() {
           {step === 2 && (
             <motion.div
               key="step2"
-              initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="mx-auto w-full max-w-lg flex-1 px-4 py-8"
             >
               <div className="mb-6 text-center">

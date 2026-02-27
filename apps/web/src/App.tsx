@@ -11,20 +11,13 @@ import VideoUpload from '@/pages/VideoUpload';
 import SharePage from '@/pages/SharePage';
 import NotFound from '@/pages/NotFound';
 
-const pageTransition = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -12 },
-  transition: { duration: 0.3, ease: 'easeInOut' as const },
-};
-
 function AnimatedPage({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
-      initial={pageTransition.initial}
-      animate={pageTransition.animate}
-      exit={pageTransition.exit}
-      transition={pageTransition.transition}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
     >
       {children}
     </motion.div>

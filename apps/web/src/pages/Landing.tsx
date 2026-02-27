@@ -45,8 +45,9 @@ const testimonials = [
 ];
 
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const lang = i18n.language === "he" ? "he" : "en";
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -216,10 +217,10 @@ export default function Landing() {
                   <Card className="p-5 text-center">
                     <span className="mb-3 block text-4xl">{style.emoji}</span>
                     <h3 className="mb-1 text-lg font-bold text-[var(--text)]">
-                      {style.nameEn}
+                      {lang === "he" ? style.nameHe : style.nameEn}
                     </h3>
                     <p className="mb-4 text-sm text-[var(--text-muted)]">
-                      {style.descriptionEn}
+                      {lang === "he" ? style.descriptionHe : style.descriptionEn}
                     </p>
                     <MiniPlayer
                       url={`/demo/${style.id}-preview.mp3`}

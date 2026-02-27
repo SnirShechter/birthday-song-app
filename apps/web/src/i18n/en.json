@@ -1,214 +1,218 @@
 {
   "landing": {
-    "heroTitle": "A Birthday Song Made Just for Them",
-    "heroSubtitle": "Tell us about the birthday person — get a fully personalized AI song in minutes. Any style, any language.",
-    "cta": "Create a Song Now",
-    "ctaSecondary": "Hear a Demo",
-    "socialProof": "{{count}} songs created this week",
-    "demoLabel": "Listen to a sample birthday song",
-    "howItWorks": "How It Works",
-    "step1Title": "Tell Us About Them",
-    "step1Desc": "Fill a fun questionnaire about the birthday person — their personality, hobbies, and funny stories.",
-    "step2Title": "Choose a Style",
-    "step2Desc": "Pick from Pop, Rap, Rock, Mizrachi, Ballad, Jazz, or Comedy — whatever fits the vibe.",
-    "step3Title": "Get Your Song",
-    "step3Desc": "AI writes custom lyrics and produces a professional-quality song in under 5 minutes.",
-    "step4Title": "Share the Joy",
-    "step4Desc": "Download your song, share it at the party, or send a personalized video clip.",
-    "testimonialTitle": "People Love It",
-    "testimonial1": "My mom cried when she heard her personalized song. Best birthday gift ever!",
-    "testimonial1Author": "Sarah M.",
-    "testimonial2": "The rap roast we got for my friend was absolutely hilarious. Worth every penny.",
-    "testimonial2Author": "David K.",
-    "testimonial3": "I ordered songs for my whole team. Everyone was blown away by the quality.",
-    "testimonial3Author": "Maya L.",
-    "pricing": "Starting at just $9.99"
+    "hero": {
+      "title": "The Most Personal Birthday Gift",
+      "subtitle": "AI creates a unique, personalized birthday song in minutes. Funny, emotional, unforgettable.",
+      "cta": "Create a Birthday Song — Free!",
+      "socialProof": "songs created this week"
+    },
+    "demo": {
+      "title": "Hear the Magic",
+      "subtitle": "Listen to real songs created by our AI",
+      "featured": "Featured Demo",
+      "demoTitle": "Happy Birthday, Sarah!"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Three simple steps to an unforgettable gift",
+      "stepLabel": "Step {{num}}",
+      "step1": {
+        "title": "Answer Questions",
+        "description": "Tell us about the birthday person — their personality, hobbies, funny stories."
+      },
+      "step2": {
+        "title": "Choose a Style",
+        "description": "Pick from Pop, Rap, Rock, Mizrachi and more. Each style crafted uniquely."
+      },
+      "step3": {
+        "title": "Get Your Song",
+        "description": "AI creates a professional-quality song in minutes. Listen, love it, share it."
+      }
+    },
+    "testimonials": {
+      "title": "What People Are Saying",
+      "testimonial1": {
+        "text": "My best friend literally cried when she heard her song. It mentioned her cat, her obsession with sushi, everything! Best birthday gift ever.",
+        "role": "Best Friend"
+      },
+      "testimonial2": {
+        "text": "I chose the rap style for my dad's 60th birthday. The whole family couldn't stop laughing. The lyrics were so spot-on!",
+        "role": "Daughter"
+      },
+      "testimonial3": {
+        "text": "Ordered it at 11pm the night before the party. Had a professional song ready in 15 minutes. Absolute lifesaver!",
+        "role": "Office Manager"
+      }
+    },
+    "footerCta": {
+      "title": "Ready?",
+      "subtitle": "Create your personalized birthday song now. It's free to try!",
+      "cta": "Create Your Song Now"
+    }
   },
   "questionnaire": {
-    "title": "Let's Get to Know Them",
-    "subtitle": "The more you share, the more personal the song will be. Don't worry — you can skip anything!",
-    "recipientName": "What's the birthday person's name?",
-    "recipientNamePlaceholder": "e.g. Sarah, David",
-    "recipientNameTip": "The name that will appear in the song",
-    "recipientNickname": "Any nickname or pet name?",
-    "recipientNicknamePlaceholder": "e.g. Sari, Dudi",
-    "recipientNicknameTip": "Optional — adds a personal touch",
-    "recipientGender": "Gender (for grammar)",
-    "genderMale": "Male",
-    "genderFemale": "Female",
-    "genderOther": "Other / Neutral",
-    "recipientAge": "How old are they turning?",
-    "recipientAgePlaceholder": "e.g. 30",
-    "relationship": "What's your relationship?",
-    "relationshipPlaceholder": "Choose or type your own",
-    "personalityTraits": "Pick their personality traits",
-    "personalityTraitsTip": "Choose up to 5 traits that best describe them",
-    "hobbies": "What are their hobbies or passions?",
-    "hobbiesPlaceholder": "e.g. Cooking, hiking, gaming, playing guitar",
-    "hobbiesTip": "We'll weave these into the lyrics",
-    "funnyStory": "Got a funny story or inside joke?",
-    "funnyStoryPlaceholder": "e.g. That time they got lost at the mall for 3 hours...",
-    "funnyStoryTip": "This is what makes the song truly one-of-a-kind",
-    "occupation": "What do they do for work?",
-    "occupationPlaceholder": "e.g. Software engineer, teacher, chef",
-    "petPeeve": "What's their biggest pet peeve?",
-    "petPeevePlaceholder": "e.g. People who chew loudly",
-    "importantPeople": "Who are the important people in their life?",
-    "importantPeoplePlaceholder": "e.g. Kids: Noa and Yoav, best friend: Lior",
-    "sharedMemory": "A meaningful memory you share?",
-    "sharedMemoryPlaceholder": "e.g. Our road trip to the desert where everything went wrong but we laughed all night",
-    "desiredMessage": "Any specific message to include?",
-    "desiredMessagePlaceholder": "e.g. Thank you for always being there",
-    "desiredTone": "What's the vibe?",
-    "toneFunny": "Funny & Roast",
-    "toneEmotional": "Emotional & Heartfelt",
-    "toneMixed": "Mix of Both",
-    "socialAutofill": "Quick Fill from Social",
-    "socialAutofillDesc": "Paste their Instagram or TikTok link and we'll fill in some details automatically",
-    "socialPlaceholder": "Paste Instagram or TikTok URL",
-    "socialScan": "Scan Profile",
-    "socialScanning": "Scanning profile...",
-    "socialFound": "Found some details! Review and continue.",
-    "socialPrivate": "This profile is private. No worries — fill in the details manually!",
-    "socialNotFound": "Couldn't find the profile. Let's fill in manually!",
-    "next": "Continue",
+    "step1Title": "Who's the birthday star? 🌟",
+    "step1Subtitle": "Just the basics — we'll make it personal in the next step",
+    "step2Title": "Tell us about {{name}}",
+    "step2Subtitle": "Write anything you want — the more details, the better the song! Tap a topic for inspiration 👇",
+    "nameLabel": "Their name",
+    "namePlaceholder": "e.g., Sarah",
+    "ageLabel": "Age they're turning",
+    "genderLabel": "Gender",
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "relationshipLabel": "Your relationship",
+    "relationshipPlaceholder": "e.g., Best friend, sister, mom...",
+    "toneLabel": "Song vibe",
+    "tone": {
+      "funny": "Funny",
+      "emotional": "Emotional",
+      "mixed": "Mixed"
+    },
+    "chips": {
+      "personality": "Personality traits",
+      "hobbies": "Hobbies & interests",
+      "funny": "Funny story",
+      "work": "What they do",
+      "people": "Important people",
+      "message": "Special message"
+    },
+    "freeTextPlaceholder": "Write whatever comes to mind... their personality, funny stories, hobbies, inside jokes, what makes them special...",
+    "freeTextHint": "💡 This is optional but makes the song WAY more personal",
+    "next": "Next — Make It Personal",
     "back": "Back",
-    "skip": "Skip",
-    "submit": "Create My Song!"
+    "createSong": "Create Song ✨",
+    "error": "Something went wrong. Please try again."
   },
-  "stylePicker": {
-    "title": "Pick the Perfect Style",
-    "subtitle": "Choose a music genre that fits the birthday person's taste. Don't worry — you can try different styles later!",
-    "pop": "Pop",
-    "popDesc": "Catchy, upbeat, happy vibes",
-    "rap": "Rap / Hip-Hop",
-    "rapDesc": "Punchlines, flow, wordplay",
-    "rock": "Rock",
-    "rockDesc": "Guitars, energy, anthem",
-    "ballad": "Ballad",
-    "balladDesc": "Emotional, piano-driven, heartfelt",
-    "mizrachi": "Mizrachi",
-    "mizrachiDesc": "Israeli Mizrachi, warm and festive",
-    "classic": "Classic / Jazz",
-    "classicDesc": "Classy, unique, sophisticated",
-    "comedy": "Comedy / Roast",
-    "comedyDesc": "Funny, sharp, with love",
-    "continue": "Generate Lyrics",
-    "generating": "Creating your personalized lyrics..."
+  "style": {
+    "badge": "Step 2 of 4",
+    "title": "Choose a Style",
+    "subtitle": "Each style gives your song a unique feel. Pick the one that matches their personality.",
+    "loading": {
+      "writing": "Writing lyrics...",
+      "rhyme": "Finding the perfect rhyme...",
+      "personal": "Adding personal touches...",
+      "polish": "Polishing every verse...",
+      "magic": "Sprinkling some magic...",
+      "almost": "Almost there..."
+    }
   },
   "lyrics": {
-    "title": "Your Personalized Lyrics",
-    "subtitle": "We created {{count}} unique versions. Pick the one you love, or edit it to make it perfect.",
-    "choose": "Use These Lyrics",
-    "edit": "Edit Lyrics",
-    "saveEdit": "Save Changes",
-    "cancelEdit": "Cancel",
-    "refresh": "Generate New Version",
-    "refreshing": "Generating...",
-    "modelClaude": "Creative & Poetic",
-    "modelGpt4o": "Balanced & Natural",
-    "modelGemini": "Fun & Playful",
-    "generating": "AI is writing your personalized lyrics...",
-    "generatingTip": "This takes about 10-15 seconds",
-    "chosenBadge": "Selected",
-    "continue": "Create My Song"
+    "badge": "Step 3 of 4",
+    "title": "Choose Your Lyrics",
+    "subtitle": "We created 3 unique variations. Pick the one you love most, or regenerate for fresh options.",
+    "fetching": "Loading your lyrics...",
+    "refresh": "Generate New Variations",
+    "refreshHint": "Each refresh creates 3 brand new lyrics variations",
+    "generating": {
+      "composing": "Composing your song...",
+      "vocals": "Adding vocals...",
+      "mixing": "Mixing the track...",
+      "mastering": "Mastering the audio...",
+      "finalTouches": "Final touches...",
+      "almost": "Almost ready to play..."
+    }
   },
-  "songPreview": {
+  "preview": {
+    "badge": "Step 4 of 4",
     "title": "Your Song is Ready!",
-    "subtitle": "Listen to a preview of your personalized birthday song. Unlock the full version to download and share.",
-    "previewLabel": "Preview (10 seconds)",
-    "fullLabel": "Full Song",
-    "unlock": "Unlock Full Song",
-    "variation": "Version {{num}}",
-    "generating": "Composing your song...",
-    "generatingTip": "This usually takes 30-60 seconds",
-    "tryAnother": "Try Another Version",
-    "continue": "Get Full Song",
-    "provider": "Produced by AI"
+    "subtitle": "Listen to your personalized birthday song. Pick your favorite version!",
+    "fetching": "Loading your songs...",
+    "select": "Select This Version",
+    "selected": "Selected ✓",
+    "unlock": "Continue to Checkout"
   },
   "checkout": {
     "title": "Choose Your Package",
-    "subtitle": "Every package includes a fully personalized birthday song with professional AI vocals.",
-    "song": "Song Only",
-    "songDesc": "Full song (2-3 min), MP3 + WAV download, no watermark",
-    "songPrice": "$9.99",
-    "bundle": "Song + Video",
-    "bundleDesc": "Full song + 30s animated video clip + sharing page",
-    "bundlePrice": "$19.99",
-    "bundleBadge": "Most Popular",
-    "premium": "Premium",
-    "premiumDesc": "3 song versions + HD video + QR code for the party",
-    "premiumPrice": "$29.99",
-    "pay": "Pay {{price}}",
-    "secureNotice": "Secure payment via Stripe. 100% satisfaction guarantee.",
-    "processing": "Processing payment..."
+    "loading": "Processing...",
+    "proceed": "Proceed to Payment",
+    "back": "Back",
+    "summary": {
+      "title": "Order Summary",
+      "recipient": "For: {{name}}",
+      "style": "Style: {{style}}",
+      "plan": "Plan: {{plan}}",
+      "total": "Total: {{total}}"
+    }
   },
   "success": {
-    "title": "Your Song is Ready!",
-    "subtitle": "The birthday person is going to love this. Here's everything you need.",
-    "download": "Download Song",
-    "downloadWav": "Download WAV",
-    "share": "Share Song",
-    "copyLink": "Copy Link",
-    "linkCopied": "Link copied!",
-    "videoCta": "Want to add a video clip?",
-    "videoCtaDesc": "Turn your song into an animated birthday video with photos",
-    "createVideo": "Create Video",
-    "emailNotice": "We also sent a download link to your email (check server logs in demo mode)",
-    "newSong": "Create Another Song"
+    "title": "Your Song is Ready! 🎉",
+    "subtitle": "The birthday person is going to love this.",
+    "download": {
+      "title": "Download Your Song",
+      "mp3": "Download MP3",
+      "wav": "Download WAV"
+    },
+    "share": {
+      "title": "Share",
+      "copyLink": "Copy Link",
+      "copied": "Copied!",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram"
+    },
+    "video": {
+      "title": "Want a birthday video too?",
+      "cta": "Create a Video Clip"
+    },
+    "createAnother": "Create Another Song"
   },
   "video": {
-    "title": "Create Your Birthday Video",
-    "subtitle": "Upload photos and we'll create an animated music video with your personalized song.",
-    "uploadLabel": "Upload Photos",
-    "uploadDesc": "Drag & drop up to 10 photos, or click to browse",
-    "uploadHint": "Best results with clear face photos",
-    "styleLabel": "Choose a Video Style",
-    "party": "Party Vibes",
-    "funny": "Funny Montage",
-    "emotional": "Emotional Tribute",
-    "musicVideo": "Music Video",
-    "avatar": "AI Avatar",
+    "badge": "Bonus: Video Clip",
+    "title": "Create a Birthday Video",
+    "titleComplete": "Your Video is Ready!",
+    "photos": {
+      "title": "Upload Photos",
+      "count": "{{count}} photos selected"
+    },
+    "style": {
+      "title": "Choose a Video Style"
+    },
     "generate": "Generate Video",
-    "generating": "Creating your video...",
-    "generatingTip": "This takes about 30-60 seconds",
-    "ready": "Your Video is Ready!",
+    "complete": "Download Video",
     "download": "Download Video",
-    "share": "Share Video"
+    "back": "Back",
+    "backToSuccess": "Back to Song",
+    "loading": {
+      "processing": "Processing photos...",
+      "syncing": "Syncing with music...",
+      "transitions": "Creating transitions...",
+      "effects": "Adding effects...",
+      "rendering": "Rendering video...",
+      "almost": "Almost done..."
+    }
   },
   "share": {
-    "title": "A Birthday Song for {{name}}",
-    "cta": "Create Your Own Birthday Song",
-    "playerLabel": "Personalized Birthday Song",
-    "playButton": "Play Song",
-    "pauseButton": "Pause",
+    "songTitle": "A Birthday Song for {{name}}",
+    "dedicatedTo": "Dedicated to {{name}}",
+    "style": "Style: {{style}}",
+    "listenNow": "Listen Now",
     "madeWith": "Made with Birthday Song AI",
-    "shareOn": "Share on",
-    "whatsapp": "WhatsApp",
-    "facebook": "Facebook",
-    "twitter": "X (Twitter)",
-    "copyLink": "Copy Link"
+    "goHome": "Create Your Own Song",
+    "loading": "Loading...",
+    "notFound": "Song not found",
+    "cta": {
+      "button": "Create a Birthday Song"
+    }
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "goHome": "Go Home"
   },
   "common": {
     "next": "Next",
     "back": "Back",
-    "skip": "Skip",
     "loading": "Loading...",
     "error": "Something went wrong. Please try again.",
     "retry": "Try Again",
-    "close": "Close",
-    "save": "Save",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
     "en": "English",
-    "he": "עברית",
-    "lightMode": "Light Mode",
-    "darkMode": "Dark Mode"
+    "he": "עברית"
   },
   "nav": {
     "home": "Home",
     "create": "Create Song",
-    "about": "About",
     "language": "Language"
   }
 }

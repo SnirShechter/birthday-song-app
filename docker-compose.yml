@@ -22,7 +22,7 @@ services:
       retries: 5
 
   server:
-    image: birthday-song-server:v2
+    image: birthday-song-server:v3
     build:
       context: .
       dockerfile: apps/server/Dockerfile
@@ -40,7 +40,7 @@ services:
         condition: service_healthy
 
   web:
-    image: birthday-song-web:v3
+    image: birthday-song-web:v4
     build:
       context: .
       dockerfile: apps/web/Dockerfile

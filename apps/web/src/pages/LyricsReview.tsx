@@ -60,11 +60,11 @@ export default function LyricsReview() {
 
     const fetchLyrics = async () => {
       try {
-        const data = await api.get<LyricsVariation[]>(
+        const res = await api.get<{ success: boolean; lyrics: LyricsVariation[] }>(
           `/api/orders/${orderId}/lyrics`
         );
         if (!cancelled) {
-          setLyrics(data);
+          setLyrics(res.lyrics ?? []);
           setFetching(false);
         }
       } catch {
@@ -83,10 +83,10 @@ export default function LyricsReview() {
     setRefreshing(true);
     try {
       await api.post(`/api/orders/${orderId}/generate-lyrics`, {});
-      const data = await api.get<LyricsVariation[]>(
+      const res = await api.get<{ success: boolean; lyrics: LyricsVariation[] }>(
         `/api/orders/${orderId}/lyrics`
       );
-      setLyrics(data);
+      setLyrics(res.lyrics ?? []);
       setSelectedId(null);
     } finally {
       setRefreshing(false);
