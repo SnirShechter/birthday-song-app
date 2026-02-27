@@ -107,6 +107,9 @@
     "fetching": "Loading your lyrics...",
     "refresh": "Generate New Variations",
     "refreshHint": "Each refresh creates 3 brand new lyrics variations",
+    "edit": "Edit",
+    "selected": "Selected",
+    "chooseThis": "Choose this",
     "generating": {
       "composing": "Composing your song...",
       "vocals": "Adding vocals...",
@@ -123,20 +126,38 @@
     "fetching": "Loading your songs...",
     "select": "Select This Version",
     "selected": "Selected ✓",
-    "unlock": "Continue to Checkout"
+    "unlock": "Continue to Checkout",
+    "previewNote": "You're hearing a 10-second preview",
+    "variation": {
+      "1": "Variation 1",
+      "2": "Variation 2",
+      "3": "Variation 3"
+    },
+    "variationLabel": {
+      "0": "Energetic",
+      "1": "Smooth",
+      "2": "Classic"
+    }
   },
   "checkout": {
-    "title": "Choose Your Package",
+    "title": "Get the Full Song",
+    "subtitle": "Choose your plan and unlock the full experience",
     "loading": "Processing...",
     "proceed": "Proceed to Payment",
     "back": "Back",
+    "secure": "Secure payment. Satisfaction guaranteed.",
     "summary": {
       "title": "Order Summary",
-      "recipient": "For: {{name}}",
-      "style": "Style: {{style}}",
-      "plan": "Plan: {{plan}}",
-      "total": "Total: {{total}}"
-    }
+      "recipient": "For",
+      "style": "Style",
+      "plan": "Plan",
+      "total": "Total"
+    },
+    "payWith": "Pay with credit card",
+    "googlePay": "Pay with Google Pay",
+    "applePay": "Pay with Apple Pay",
+    "paypal": "Pay with PayPal",
+    "price": "{{price}}"
   },
   "success": {
     "title": "Your Song is Ready! 🎉",
@@ -163,18 +184,26 @@
     "badge": "Bonus: Video Clip",
     "title": "Create a Birthday Video",
     "titleComplete": "Your Video is Ready!",
+    "subtitle": "Upload photos and choose a style to create a stunning music video.",
+    "subtitleComplete": "Watch your personalized birthday video below.",
     "photos": {
       "title": "Upload Photos",
-      "count": "{{count}} photos selected"
+      "count": "{{count}}/10",
+      "hint": "Drag & drop up to 10 photos. Best results with clear, well-lit images."
     },
     "style": {
       "title": "Choose a Video Style"
     },
     "generate": "Generate Video",
-    "complete": "Download Video",
+    "complete": "Video generated successfully!",
     "download": "Download Video",
     "back": "Back",
     "backToSuccess": "Back to Song",
+    "generateHint": {
+      "both": "Upload photos and select a style to continue",
+      "photos": "Upload at least one photo to continue",
+      "style": "Select a video style to continue"
+    },
     "loading": {
       "processing": "Processing photos...",
       "syncing": "Syncing with music...",

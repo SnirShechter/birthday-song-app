@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Edit3, Check, Sparkles } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { LyricsVariation, LyricsModel } from "@birthday-song/shared";
@@ -66,6 +67,7 @@ export function LyricsCard({
   onSelect,
   onEdit,
 }: LyricsCardProps) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const model = MODEL_CONFIG[variation.model] ?? MODEL_CONFIG.claude;
   const displayContent = variation.editedContent || variation.content;
@@ -157,7 +159,7 @@ export function LyricsCard({
             )}
           >
             <Edit3 className="h-3.5 w-3.5" />
-            Edit
+            {t("lyrics.edit", "Edit")}
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.95 }}
@@ -175,10 +177,10 @@ export function LyricsCard({
             {isSelected ? (
               <>
                 <Check className="h-4 w-4" />
-                Selected
+                {t("lyrics.selected", "Selected")}
               </>
             ) : (
-              "Choose this"
+              t("lyrics.chooseThis", "Choose this")
             )}
           </motion.button>
         </div>

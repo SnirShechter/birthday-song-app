@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, useMotionValue, useAnimation, PanInfo } from "framer-motion";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import type { LyricsVariation } from "@birthday-song/shared";
 import { LyricsCard } from "./LyricsCard";
@@ -20,50 +20,41 @@ export function LyricsCarousel({
   selectedId,
 }: LyricsCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [cardWidth, setCardWidth] = useState(0);
-  const x = useMotionValue(0);
-  const controls = useAnimation();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Detect active card on scroll via IntersectionObserver
   useEffect(() => {
-    const measure = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        // On mobile, full width minus padding. On desktop, cap at 400px
-        const width = Math.min(containerWidth - 32, 400);
-        setCardWidth(width);
-      }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
+    const container = scrollRef.current;
+    if (!container || variations.length === 0) return;
 
-  const gap = 16;
-  const totalCards = variations.length;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const idx = cardRefs.current.indexOf(
+              entry.target as HTMLDivElement
+            );
+            if (idx !== -1) setActiveIndex(idx);
+          }
+        }
+      },
+      { root: container, threshold: 0.5 }
+    );
 
-  const snapTo = (index: number) => {
-    const clamped = Math.max(0, Math.min(index, totalCards - 1));
-    setActiveIndex(clamped);
-    controls.start({
-      x: -(clamped * (cardWidth + gap)),
-      transition: { type: "spring", stiffness: 300, damping: 30 },
-    });
-  };
-
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const threshold = cardWidth / 4;
-    const velocity = info.velocity.x;
-    const offset = info.offset.x;
-
-    let newIndex = activeIndex;
-    if (offset < -threshold || velocity < -300) {
-      newIndex = activeIndex + 1;
-    } else if (offset > threshold || velocity > 300) {
-      newIndex = activeIndex - 1;
+    for (const ref of cardRefs.current) {
+      if (ref) observer.observe(ref);
     }
-    snapTo(newIndex);
-  };
+
+    return () => observer.disconnect();
+  }, [variations]);
+
+  const scrollTo = useCallback((index: number) => {
+    const card = cardRefs.current[index];
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, []);
 
   if (variations.length === 0) {
     return (
@@ -77,47 +68,34 @@ export function LyricsCarousel({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Carousel container */}
+      {/* Scrollable carousel */}
       <div
-        ref={containerRef}
-        className="relative overflow-hidden px-4"
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto px-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
-        <motion.div
-          className="flex"
-          style={{ x, gap: `${gap}px` }}
-          drag="x"
-          dragConstraints={{
-            left: -((totalCards - 1) * (cardWidth + gap)),
-            right: 0,
-          }}
-          dragElastic={0.15}
-          onDragEnd={handleDragEnd}
-          animate={controls}
-        >
-          {variations.map((v) => (
-            <motion.div
-              key={v.id}
-              className="shrink-0"
-              style={{ width: cardWidth || "100%" }}
-            >
-              <LyricsCard
-                variation={v}
-                isSelected={selectedId === v.id}
-                onSelect={() => onSelect(v.id)}
-                onEdit={(content) => onEdit(v.id, content)}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+        {variations.map((v, i) => (
+          <div
+            key={v.id}
+            ref={(el) => { cardRefs.current[i] = el; }}
+            className="w-[85vw] max-w-[400px] shrink-0 snap-center"
+          >
+            <LyricsCard
+              variation={v}
+              isSelected={selectedId === v.id}
+              onSelect={() => onSelect(v.id)}
+              onEdit={(content) => onEdit(v.id, content)}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Pagination dots */}
-      {totalCards > 1 && (
+      {variations.length > 1 && (
         <div className="flex items-center justify-center gap-2">
           {variations.map((_, i) => (
             <motion.button
               key={i}
-              onClick={() => snapTo(i)}
+              onClick={() => scrollTo(i)}
               className={cn(
                 "rounded-full transition-all duration-300 cursor-pointer",
                 i === activeIndex
