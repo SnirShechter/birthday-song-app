@@ -17,7 +17,7 @@ ARG CACHE_BUST=1
 COPY packages/shared/ ./packages/shared/
 COPY apps/web/ ./apps/web/
 
-ARG VITE_API_URL=/api
+ARG VITE_API_URL=
 ENV VITE_API_URL=${VITE_API_URL}
 
 RUN pnpm --filter @birthday-song/shared build 2>/dev/null || true
