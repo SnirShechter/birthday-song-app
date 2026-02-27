@@ -1,4 +1,4 @@
-import type { MusicStyle, ProductType } from './types';
+import type { MusicStyle, ProductType } from './types.js';
 
 export const MUSIC_STYLES: {
   id: MusicStyle;
