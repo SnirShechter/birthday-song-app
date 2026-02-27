@@ -60,11 +60,11 @@ export default function SongPreview() {
 
     const fetchSongs = async () => {
       try {
-        const data = await api.get<SongVariation[]>(
+        const res = await api.get<{ success: boolean; songs: SongVariation[] }>(
           `/api/orders/${orderId}/songs`
         );
         if (!cancelled) {
-          setSongs(data);
+          setSongs(res.songs ?? []);
           setFetching(false);
         }
       } catch {
