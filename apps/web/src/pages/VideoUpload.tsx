@@ -344,11 +344,11 @@ export default function VideoUpload() {
                   <Button
                     size="lg"
                     onClick={() =>
-                      window.open(videoData.videoUrl ?? "#", "_blank")
+                      navigate(`/checkout/${orderId}?type=video&price=1999`)
                     }
                     icon={<Download className="h-5 w-5" />}
                   >
-                    {t("video.download", "Download Video")}
+                    {t("video.getFullVideo", "Get the Full Video — $19.99")}
                   </Button>
                   <Button
                     variant="secondary"

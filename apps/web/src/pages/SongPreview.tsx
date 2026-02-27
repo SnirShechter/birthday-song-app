@@ -315,7 +315,7 @@ export default function SongPreview() {
               icon={<Lock className="h-5 w-5" />}
               className="px-10 py-5 text-lg font-bold"
             >
-              {t("preview.unlock", "Unlock Full Song — $9.99")}
+              {t("preview.unlock", "I want this song!")}
             </Button>
           </motion.div>
         </div>

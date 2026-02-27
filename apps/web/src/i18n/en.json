@@ -139,7 +139,7 @@
     "fetching": "Loading your songs...",
     "select": "Select This Version",
     "selected": "Selected ✓",
-    "unlock": "Continue to Checkout",
+    "unlock": "I want this song!",
     "previewNote": "You're hearing a 10-second preview",
     "variation": {
       "1": "Variation 1",
@@ -212,6 +212,7 @@
     "generate": "Generate Video",
     "complete": "Video generated successfully!",
     "download": "Download Video",
+    "getFullVideo": "Get the Full Video — $19.99",
     "back": "Back",
     "backToSuccess": "Back to Song",
     "generateHint": {
