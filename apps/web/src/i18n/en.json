@@ -188,8 +188,10 @@
       "telegram": "Telegram"
     },
     "video": {
-      "title": "Want a birthday video too?",
-      "cta": "Create a Video Clip"
+      "title": "Want a video clip too?",
+      "description": "Turn your song into a stunning music video with photos and effects.",
+      "cta": "Create a Video Clip",
+      "preview": "10-second preview"
     },
     "createAnother": "Create Another Song"
   },

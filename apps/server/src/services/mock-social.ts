@@ -28,6 +28,7 @@ const FAKE_PROFILES: SocialProfile[] = [
       '/mock-assets/photos/profile-male-1.jpg',
       '/mock-assets/photos/profile-male-2.jpg',
     ],
+    profilePhoto: 'https://picsum.photos/400/400?random=1',
   },
   {
     status: 'found',
@@ -56,6 +57,7 @@ const FAKE_PROFILES: SocialProfile[] = [
       '/mock-assets/photos/profile-female-1.jpg',
       '/mock-assets/photos/profile-female-2.jpg',
     ],
+    profilePhoto: 'https://picsum.photos/400/400?random=2',
   },
   {
     status: 'found',
@@ -84,6 +86,7 @@ const FAKE_PROFILES: SocialProfile[] = [
       '/mock-assets/photos/profile-male-en-1.jpg',
       '/mock-assets/photos/profile-male-en-2.jpg',
     ],
+    profilePhoto: 'https://picsum.photos/400/400?random=3',
   },
 ];
 

@@ -12,7 +12,6 @@ import {
   ExternalLink,
   PartyPopper,
 } from "lucide-react";
-import { cn } from "@/lib/cn";
 import { useOrderStore } from "@/stores/order";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -57,8 +56,7 @@ export default function Success() {
   const storeOrderId = useOrderStore((s) => s.orderId);
 
   const orderId = searchParams.get("orderId") ?? storeOrderId;
-  const tier = searchParams.get("tier") ?? "song";
-  const hasVideo = tier === "bundle" || tier === "premium";
+  const socialProfilePhoto = useOrderStore((s) => s.socialProfilePhoto);
 
   const [copied, setCopied] = useState(false);
   const [showConfetti, setShowConfetti] = useState(true);
@@ -161,6 +159,52 @@ export default function Success() {
             )}
           </motion.p>
 
+          {/* Video CTA — always shown */}
+          <motion.div variants={fadeUp}>
+            <Card hoverable className="mb-6 overflow-hidden p-6">
+              <div className="mb-3 flex justify-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[image:var(--gradient-main)] text-white shadow-lg">
+                  <Video className="h-7 w-7" />
+                </div>
+              </div>
+              <h3 className="mb-2 text-lg font-bold text-[var(--text)]">
+                {t("success.video.title", "Want a video clip too?")}
+              </h3>
+              <p className="mb-4 text-sm text-[var(--text-muted)]">
+                {t(
+                  "success.video.description",
+                  "Turn your song into a stunning music video with photos and effects."
+                )}
+              </p>
+
+              {socialProfilePhoto && (
+                <div className="mb-4 overflow-hidden rounded-xl">
+                  <video
+                    className="w-full rounded-xl"
+                    poster={socialProfilePhoto}
+                    src={`${socialProfilePhoto}&blur=2`}
+                    muted
+                    playsInline
+                    controls={false}
+                  />
+                  <p className="mt-1 text-center text-xs text-[var(--text-muted)]">
+                    {t("success.video.preview", "10-second preview")}
+                  </p>
+                </div>
+              )}
+
+              <Button
+                size="lg"
+                onClick={() => navigate(`/video/${orderId}`)}
+                icon={<Video className="h-5 w-5" />}
+                iconPosition="right"
+                className="w-full py-4 text-base font-bold"
+              >
+                {t("success.video.cta", "Create a Video Clip")}
+              </Button>
+            </Card>
+          </motion.div>
+
           {/* Download buttons */}
           <motion.div variants={fadeUp}>
             <Card hoverable={false} className="mb-6 p-6">
@@ -237,35 +281,6 @@ export default function Success() {
               </div>
             </Card>
           </motion.div>
-
-          {/* Video CTA (if bundle/premium) */}
-          {hasVideo && (
-            <motion.div variants={fadeUp}>
-              <Card hoverable className="mb-6 overflow-hidden p-6">
-                <div className="mb-3 flex justify-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[image:var(--gradient-main)] text-white shadow-lg">
-                    <Video className="h-7 w-7" />
-                  </div>
-                </div>
-                <h3 className="mb-2 text-lg font-bold text-[var(--text)]">
-                  {t("success.video.title", "Now Create a Video!")}
-                </h3>
-                <p className="mb-4 text-sm text-[var(--text-muted)]">
-                  {t(
-                    "success.video.description",
-                    "Upload photos and we'll create a stunning music video with your song."
-                  )}
-                </p>
-                <Button
-                  onClick={() => navigate(`/video/${orderId}`)}
-                  icon={<Video className="h-4 w-4" />}
-                  iconPosition="right"
-                >
-                  {t("success.video.cta", "Create Video")}
-                </Button>
-              </Card>
-            </motion.div>
-          )}
 
           {/* Create another */}
           <motion.div variants={fadeUp} className="mt-4">

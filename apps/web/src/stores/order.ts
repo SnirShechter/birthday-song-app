@@ -24,6 +24,7 @@ interface OrderState {
   video: VideoClip | null;
   paymentStatus: PaymentStatus | null;
   generationStatus: GenerationStatus;
+  socialProfilePhoto: string | null;
 
   // Actions
   setOrderId: (id: string) => void;
@@ -42,6 +43,7 @@ interface OrderState {
   setVideo: (video: VideoClip) => void;
   setPaymentStatus: (status: PaymentStatus) => void;
   setGenerationStatus: (status: GenerationStatus) => void;
+  setSocialProfilePhoto: (url: string | null) => void;
   reset: () => void;
 }
 
@@ -58,6 +60,7 @@ const initialState = {
   video: null as VideoClip | null,
   paymentStatus: null as PaymentStatus | null,
   generationStatus: 'idle' as GenerationStatus,
+  socialProfilePhoto: null as string | null,
 };
 
 export const useOrderStore = create<OrderState>()(
@@ -122,6 +125,8 @@ export const useOrderStore = create<OrderState>()(
 
       setGenerationStatus: (generationStatus) => set({ generationStatus }),
 
+      setSocialProfilePhoto: (socialProfilePhoto) => set({ socialProfilePhoto }),
+
       reset: () => set(initialState),
     }),
     {
@@ -134,6 +139,7 @@ export const useOrderStore = create<OrderState>()(
         selectedLyricsId: state.selectedLyricsId,
         selectedSongId: state.selectedSongId,
         paymentStatus: state.paymentStatus,
+        socialProfilePhoto: state.socialProfilePhoto,
       }),
     },
   ),

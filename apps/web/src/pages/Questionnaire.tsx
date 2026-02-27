@@ -138,6 +138,7 @@ export default function Questionnaire() {
           setFreeText(parts.join(". "));
         }
 
+        useOrderStore.getState().setSocialProfilePhoto(profile.profilePhoto ?? null);
         setSocialSuccess(true);
         // Move to form after short delay
         setTimeout(() => {

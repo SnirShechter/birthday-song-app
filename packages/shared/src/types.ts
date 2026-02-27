@@ -143,6 +143,7 @@ export interface SocialProfile {
   suggestedSongTone?: Tone;
   songMaterial?: string[];
   photoUrls?: string[];
+  profilePhoto?: string;
 }
 
 export interface AdminStats {
