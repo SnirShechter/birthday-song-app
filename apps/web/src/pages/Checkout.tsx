@@ -53,9 +53,9 @@ export default function Checkout() {
 
     const fetchOrder = async () => {
       try {
-        const data = await api.get<Order>(`/api/orders/${orderId}`);
+        const data = await api.get<{ success: boolean; order: Order }>(`/api/orders/${orderId}`);
         if (!cancelled) {
-          setOrder(data);
+          setOrder(data.order);
           setFetching(false);
         }
       } catch {
@@ -78,11 +78,16 @@ export default function Checkout() {
     setProcessing(true);
 
     try {
+      // Step 1: Create checkout session on the server
+      const checkoutRes = await api.post<{
+        success: boolean;
+        sessionId: string;
+        checkoutUrl: string;
+      }>(`/api/orders/${orderId}/checkout`, { tier: selectedTier });
+
+      // Step 2: Complete the mock payment via webhook
       await api.post("/api/webhooks/stripe", {
-        orderId,
-        productType: selectedTier,
-        amountCents: PRICING[selectedTier].amountCents,
-        status: "completed",
+        sessionId: checkoutRes.sessionId,
       });
 
       navigate(`/success?orderId=${orderId}&tier=${selectedTier}`);

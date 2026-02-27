@@ -29,16 +29,20 @@ FROM nginx:alpine AS production
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 
 # Nginx config: SPA routing + reverse proxy to backend
-RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
+RUN cat > /etc/nginx/conf.d/default.conf << 'NGINXEOF'
+# Use Docker internal DNS resolver so service names resolve at request time
+resolver 127.0.0.11 valid=10s ipv6=off;
+
 server {
     listen 80;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
 
-    # API reverse proxy to backend
+    # API reverse proxy to backend (variable forces runtime DNS resolution)
     location /api/ {
-        proxy_pass http://server:3000/api/;
+        set $backend http://server:3000;
+        proxy_pass $backend;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -47,21 +51,16 @@ server {
 
     # Mock checkout proxy
     location /mock-checkout {
-        proxy_pass http://server:3000/mock-checkout;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    # Webhook proxy
-    location /api/webhooks/ {
-        proxy_pass http://server:3000/api/webhooks/;
+        set $backend http://server:3000;
+        proxy_pass $backend;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
 
     # Health check
     location /health {
-        proxy_pass http://server:3000/health;
+        set $backend http://server:3000;
+        proxy_pass $backend;
     }
 
     # SPA fallback
@@ -75,7 +74,7 @@ server {
         add_header Cache-Control "public, immutable";
     }
 }
-EOF
+NGINXEOF
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

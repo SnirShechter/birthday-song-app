@@ -49,7 +49,9 @@ function mapOrder(row: Record<string, unknown>): Order {
     sharedMemory: row.sharedMemory as string | undefined,
     desiredMessage: row.desiredMessage as string | undefined,
     desiredTone: row.desiredTone as Order['desiredTone'],
-    questionnaireRaw: row.questionnaireRaw as QuestionnaireAnswers,
+    questionnaireRaw: (typeof row.questionnaireRaw === 'string'
+      ? JSON.parse(row.questionnaireRaw)
+      : row.questionnaireRaw) as QuestionnaireAnswers,
     language: row.language as Order['language'],
     selectedStyle: row.selectedStyle as MusicStyle | undefined,
     selectedLyricsId: row.selectedLyricsId as number | undefined,

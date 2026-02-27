@@ -14,7 +14,7 @@ export const createOrderSchema = z.object({
   importantPeople: z.string().max(500).optional(),
   sharedMemory: z.string().max(1000).optional(),
   desiredMessage: z.string().max(500).optional(),
-  desiredTone: z.enum(['funny', 'emotional', 'mixed']),
+  desiredTone: z.enum(['funny', 'emotional', 'mixed']).default('mixed'),
   language: z.enum(['he', 'en']).default('he'),
 });
 

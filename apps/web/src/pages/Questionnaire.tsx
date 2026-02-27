@@ -1,18 +1,20 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   ArrowRight,
-  SkipForward,
-  Send,
-  User,
   Sparkles,
+  Music,
+  Cake,
+  User,
+  Heart,
+  Laugh,
+  Briefcase,
+  Users,
+  Star,
 } from "lucide-react";
 import {
-  PERSONALITY_TRAITS,
-  RELATIONSHIPS,
   type QuestionnaireAnswers,
   type Gender,
   type Tone,
@@ -21,756 +23,402 @@ import { cn } from "@/lib/cn";
 import api from "@/lib/api";
 import { useOrderStore } from "@/stores/order";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { RadioGroup } from "@/components/ui/RadioGroup";
-import { ChatBubble } from "@/components/questionnaire/ChatBubble";
-import { ProgressBar } from "@/components/questionnaire/ProgressBar";
-import { SocialAutofill } from "@/components/questionnaire/SocialAutofill";
 import { Shell } from "@/components/layout/Shell";
-
-interface ChatMessage {
-  id: string;
-  type: "ai" | "user";
-  content: string;
-  animate: boolean;
-}
-
-const TOTAL_STEPS = 12;
 
 const STORAGE_KEY = "birthday-song-questionnaire";
 
-function loadSavedAnswers(): Partial<QuestionnaireAnswers> {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : {};
-  } catch {
-    return {};
-  }
+const TONE_OPTIONS: { value: Tone; emoji: string; labelKey: string; fallback: string }[] = [
+  { value: "funny", emoji: "😂", labelKey: "tone.funny", fallback: "Funny" },
+  { value: "emotional", emoji: "🥹", labelKey: "tone.emotional", fallback: "Emotional" },
+  { value: "mixed", emoji: "🎭", labelKey: "tone.mixed", fallback: "Mixed" },
+];
+
+const GENDER_OPTIONS: { value: Gender; labelKey: string; fallback: string }[] = [
+  { value: "male", labelKey: "gender.male", fallback: "Male / זכר" },
+  { value: "female", labelKey: "gender.female", fallback: "Female / נקבה" },
+  { value: "other", labelKey: "gender.other", fallback: "Other / אחר" },
+];
+
+interface SuggestionChip {
+  icon: React.ElementType;
+  labelKey: string;
+  fallback: string;
+  placeholder: string;
 }
 
-function saveAnswers(answers: Partial<QuestionnaireAnswers>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
-}
+const SUGGESTION_CHIPS: SuggestionChip[] = [
+  { icon: Heart, labelKey: "chips.personality", fallback: "Personality traits", placeholder: "e.g., Always laughing, super stubborn, heart of gold..." },
+  { icon: Star, labelKey: "chips.hobbies", fallback: "Hobbies & interests", placeholder: "e.g., Cooking, gaming, surfing, yoga..." },
+  { icon: Laugh, labelKey: "chips.funny", fallback: "Funny story", placeholder: "e.g., That time they fell asleep at their own party..." },
+  { icon: Briefcase, labelKey: "chips.work", fallback: "What they do", placeholder: "e.g., Software developer who never sleeps..." },
+  { icon: Users, labelKey: "chips.people", fallback: "Important people", placeholder: "e.g., Best friend Maya, dog named Cookie..." },
+  { icon: Music, labelKey: "chips.message", fallback: "Special message", placeholder: "e.g., You're the best sister in the world..." },
+];
 
 export default function Questionnaire() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const lang = (i18n.language === "he" ? "he" : "en") as "en" | "he";
+  const isRTL = lang === "he";
   const setOrder = useOrderStore((s) => s.setOrder);
   const setOrderId = useOrderStore((s) => s.setOrderId);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showSocialAutofill, setShowSocialAutofill] = useState(true);
-  const [answers, setAnswers] = useState<Partial<QuestionnaireAnswers>>(
-    loadSavedAnswers
-  );
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Step 1: basics
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState<Gender | "">("");
+  const [relationship, setRelationship] = useState("");
+  const [tone, setTone] = useState<Tone>("mixed");
+
+  // Step 2: free text
+  const [freeText, setFreeText] = useState("");
+  const [activeChip, setActiveChip] = useState<number | null>(null);
+
+  // Flow
+  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [selectedTraits, setSelectedTraits] = useState<string[]>(
-    answers.personalityTraits ?? []
-  );
+  const [error, setError] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const canProceed = name.trim().length > 0 && gender !== "";
 
-  const personalityOptions = PERSONALITY_TRAITS[lang];
-  const relationshipOptions = RELATIONSHIPS[lang];
-
-  const questions = useMemo(
-    () => [
-      {
-        key: "recipientName",
-        text: t(
-          "questionnaire.q1",
-          "What's the birthday person's name? And do they have a nickname?"
-        ),
-        type: "text" as const,
-        placeholder: t("questionnaire.q1Placeholder", "Name / Nickname"),
-        required: true,
-      },
-      {
-        key: "recipientGender",
-        text: t("questionnaire.q2", "What's their gender?"),
-        type: "select" as const,
-        options: [
-          { value: "male", label: t("questionnaire.gender.male", "Male") },
-          { value: "female", label: t("questionnaire.gender.female", "Female") },
-          { value: "other", label: t("questionnaire.gender.other", "Other") },
-        ],
-        required: true,
-      },
-      {
-        key: "recipientAge",
-        text: t("questionnaire.q3", "How old are they turning?"),
-        type: "number" as const,
-        placeholder: t("questionnaire.q3Placeholder", "Age"),
-        required: true,
-      },
-      {
-        key: "relationship",
-        text: t("questionnaire.q4", "What's your relationship to them?"),
-        type: "select" as const,
-        options: relationshipOptions.map((r) => ({ value: r, label: r })),
-        required: true,
-      },
-      {
-        key: "personalityTraits",
-        text: t(
-          "questionnaire.q5",
-          "Pick up to 3 personality traits that describe them best."
-        ),
-        type: "multiselect" as const,
-        options: personalityOptions.map((p) => ({ value: p, label: p })),
-        required: true,
-      },
-      {
-        key: "hobbies",
-        text: t(
-          "questionnaire.q6",
-          "What are their hobbies or things they love doing?"
-        ),
-        type: "textarea" as const,
-        placeholder: t(
-          "questionnaire.q6Placeholder",
-          "e.g., cooking, hiking, gaming..."
-        ),
-        required: false,
-      },
-      {
-        key: "funnyStory",
-        text: t(
-          "questionnaire.q7",
-          "Got a funny or embarrassing story about them? The juicier the better!"
-        ),
-        type: "textarea" as const,
-        placeholder: t(
-          "questionnaire.q7Placeholder",
-          "That one time they..."
-        ),
-        required: false,
-      },
-      {
-        key: "desiredTone",
-        text: t("questionnaire.q8", "What tone should the song have?"),
-        type: "select" as const,
-        options: [
-          { value: "funny", label: t("questionnaire.tone.funny", "Funny") },
-          {
-            value: "emotional",
-            label: t("questionnaire.tone.emotional", "Emotional"),
-          },
-          { value: "mixed", label: t("questionnaire.tone.mixed", "Mixed") },
-        ],
-        required: true,
-      },
-      {
-        key: "occupation",
-        text: t("questionnaire.q9", "What do they do for work? (Optional)"),
-        type: "text" as const,
-        placeholder: t("questionnaire.q9Placeholder", "Occupation"),
-        required: false,
-      },
-      {
-        key: "petPeeve",
-        text: t(
-          "questionnaire.q10",
-          "Any pet peeve or quirky habit? (Optional)"
-        ),
-        type: "text" as const,
-        placeholder: t(
-          "questionnaire.q10Placeholder",
-          "e.g., always late, hates pineapple on pizza..."
-        ),
-        required: false,
-      },
-      {
-        key: "importantPeople",
-        text: t(
-          "questionnaire.q11",
-          "Any important people to mention in the song? (Optional)"
-        ),
-        type: "text" as const,
-        placeholder: t(
-          "questionnaire.q11Placeholder",
-          "e.g., partner's name, best friend, pet..."
-        ),
-        required: false,
-      },
-      {
-        key: "sharedMemory",
-        text: t(
-          "questionnaire.q12",
-          "A special shared memory you'd like included? (Optional)"
-        ),
-        type: "textarea" as const,
-        placeholder: t(
-          "questionnaire.q12Placeholder",
-          "A trip, a moment, something meaningful..."
-        ),
-        required: false,
-      },
-    ],
-    [t, personalityOptions, relationshipOptions]
-  );
-
-  // Auto-scroll to bottom of chat
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages, currentStep]);
-
-  // Focus input on step change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 900);
-    return () => clearTimeout(timer);
-  }, [currentStep]);
-
-  // Add AI question when step changes
-  useEffect(() => {
-    if (currentStep < questions.length) {
-      const question = questions[currentStep];
-      const msgId = `ai-${currentStep}`;
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === msgId)) return prev;
-        return [
-          ...prev,
-          {
-            id: msgId,
-            type: "ai",
-            content: question.text,
-            animate: true,
-          },
-        ];
-      });
-    }
-  }, [currentStep, questions]);
-
-  const updateAnswer = useCallback(
-    (key: string, value: unknown) => {
-      setAnswers((prev) => {
-        const next = { ...prev, [key]: value };
-        saveAnswers(next);
-        return next;
-      });
-    },
-    []
-  );
-
-  const addUserMessage = useCallback((content: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `user-${Date.now()}`,
-        type: "user",
-        content,
-        animate: true,
-      },
-    ]);
-  }, []);
-
-  const goToNextStep = useCallback(() => {
-    if (currentStep < TOTAL_STEPS - 1) {
-      setCurrentStep((s) => s + 1);
-      setInputValue("");
-    }
-  }, [currentStep]);
-
-  const handleSubmitAnswer = useCallback(() => {
-    const question = questions[currentStep];
-    if (!question) return;
-
-    if (question.type === "multiselect") {
-      if (question.required && selectedTraits.length === 0) return;
-      updateAnswer(question.key, selectedTraits);
-      addUserMessage(selectedTraits.join(", "));
-      goToNextStep();
-      return;
-    }
-
-    if (question.type === "select") {
-      // Select answers are handled via the RadioGroup onChange
-      return;
-    }
-
-    const value = inputValue.trim();
-    if (question.required && !value) return;
-
-    if (question.type === "number") {
-      updateAnswer(question.key, value ? parseInt(value, 10) : undefined);
-    } else if (question.key === "recipientName") {
-      const parts = value.split("/").map((p) => p.trim());
-      updateAnswer("recipientName", parts[0]);
-      if (parts[1]) {
-        updateAnswer("recipientNickname", parts[1]);
+  const handleChipClick = useCallback((index: number, placeholder: string) => {
+    setActiveChip(index);
+    // Focus textarea and add a hint
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      if (!freeText.trim()) {
+        textareaRef.current.placeholder = placeholder;
       }
-    } else {
-      updateAnswer(question.key, value || undefined);
     }
+  }, [freeText]);
 
-    addUserMessage(value || t("questionnaire.skipped", "(skipped)"));
-    goToNextStep();
-  }, [
-    currentStep,
-    questions,
-    inputValue,
-    selectedTraits,
-    updateAnswer,
-    addUserMessage,
-    goToNextStep,
-    t,
-  ]);
-
-  const handleSelectOption = useCallback(
-    (value: string) => {
-      const question = questions[currentStep];
-      if (!question) return;
-      updateAnswer(question.key, value);
-      const option = question.type === "select"
-        ? question.options?.find((o) => o.value === value)
-        : null;
-      addUserMessage(option?.label ?? value);
-      goToNextStep();
-    },
-    [currentStep, questions, updateAnswer, addUserMessage, goToNextStep]
-  );
-
-  const handleSkip = useCallback(() => {
-    const question = questions[currentStep];
-    if (!question || question.required) return;
-    addUserMessage(t("questionnaire.skipped", "(skipped)"));
-    goToNextStep();
-  }, [currentStep, questions, addUserMessage, goToNextStep, t]);
-
-  const handleBack = useCallback(() => {
-    if (currentStep > 0) {
-      setCurrentStep((s) => s - 1);
-      setInputValue("");
-    }
-  }, [currentStep]);
-
-  const handleSocialAutofillDone = useCallback(
-    (data: Partial<QuestionnaireAnswers>) => {
-      setAnswers((prev) => {
-        const next = { ...prev, ...data };
-        saveAnswers(next);
-        return next;
-      });
-      setShowSocialAutofill(false);
-    },
-    []
-  );
-
-  const handleComplete = useCallback(async () => {
+  const handleSubmit = useCallback(async () => {
+    if (submitting) return;
     setSubmitting(true);
+    setError("");
+
     try {
       const finalAnswers: QuestionnaireAnswers = {
-        recipientName: answers.recipientName ?? "",
-        recipientNickname: answers.recipientNickname,
-        recipientGender: (answers.recipientGender as Gender) ?? "other",
-        recipientAge: answers.recipientAge as number | undefined,
-        relationship: answers.relationship ?? "",
-        personalityTraits: answers.personalityTraits ?? [],
-        hobbies: answers.hobbies,
-        funnyStory: answers.funnyStory,
-        occupation: answers.occupation,
-        petPeeve: answers.petPeeve,
-        importantPeople: answers.importantPeople,
-        sharedMemory: answers.sharedMemory,
-        desiredTone: (answers.desiredTone as Tone) ?? "mixed",
+        recipientName: name.trim(),
+        recipientGender: gender as Gender,
+        recipientAge: age ? parseInt(age, 10) : undefined,
+        relationship: relationship.trim() || undefined,
+        desiredTone: tone,
         language: lang,
-        desiredMessage: answers.desiredMessage,
+        // Pack free text into multiple fields for better lyrics generation
+        hobbies: freeText.trim() || undefined,
+        personalityTraits: [],
+        desiredMessage: freeText.trim() || undefined,
       };
 
-      const response = await api.post<{ id: string; order: unknown }>(
-        "/api/orders",
-        { questionnaire: finalAnswers }
-      );
+      const response = await api.post<{
+        success: boolean;
+        order: { id: string } & Record<string, unknown>;
+      }>("/api/orders", finalAnswers);
 
-      setOrderId(response.id);
-      setOrder(response.order as never);
-      localStorage.removeItem(STORAGE_KEY);
-      navigate("/create/style");
-    } catch {
+      if (response.success && response.order) {
+        setOrderId(response.order.id);
+        setOrder(response.order as never);
+        localStorage.removeItem(STORAGE_KEY);
+        navigate("/create/style");
+      } else {
+        setError(t("questionnaire.error", "Something went wrong. Please try again."));
+      }
+    } catch (err) {
+      console.error("Submit error:", err);
+      setError(t("questionnaire.error", "Something went wrong. Please try again."));
+    } finally {
       setSubmitting(false);
     }
-  }, [answers, lang, navigate, setOrder, setOrderId]);
-
-  const currentQuestion = questions[currentStep];
-  const isLastStep = currentStep === TOTAL_STEPS - 1;
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        if (isLastStep) {
-          const value = inputValue.trim();
-          if (value) {
-            updateAnswer(currentQuestion.key, value);
-            addUserMessage(value);
-          } else {
-            addUserMessage(t("questionnaire.skipped", "(skipped)"));
-          }
-          handleComplete();
-        } else {
-          handleSubmitAnswer();
-        }
-      }
-    },
-    [
-      isLastStep,
-      inputValue,
-      handleSubmitAnswer,
-      handleComplete,
-      currentQuestion,
-      updateAnswer,
-      addUserMessage,
-      t,
-    ]
-  );
-
-  const handleTraitToggle = useCallback(
-    (trait: string) => {
-      setSelectedTraits((prev) => {
-        if (prev.includes(trait)) {
-          return prev.filter((t) => t !== trait);
-        }
-        if (prev.length >= 3) return prev;
-        return [...prev, trait];
-      });
-    },
-    []
-  );
+  }, [name, age, gender, relationship, tone, freeText, lang, navigate, setOrder, setOrderId, submitting, t]);
 
   return (
     <Shell>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
         className="flex min-h-screen flex-col"
       >
-        <ProgressBar currentStep={currentStep + 1} totalSteps={TOTAL_STEPS} />
-
-        {/* Header */}
-        <div className="sticky top-0 z-40 border-b border-[var(--glass-border)] bg-[var(--bg)]/80 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              disabled={currentStep === 0}
+        {/* Progress indicator */}
+        <div className="mx-auto w-full max-w-lg px-4 pt-6">
+          <div className="flex items-center gap-3">
+            <div
               className={cn(
-                "flex items-center gap-1 text-sm font-medium transition-colors",
-                currentStep === 0
-                  ? "text-[var(--text-muted)]/40 cursor-not-allowed"
-                  : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all",
+                "bg-[image:var(--gradient-main)] text-white shadow-lg shadow-[var(--color-primary)]/25"
               )}
             >
-              <ArrowLeft className="h-4 w-4" />
-              {t("questionnaire.back", "Back")}
-            </button>
-
-            <span className="text-sm font-medium text-[var(--text-muted)]">
-              {t("questionnaire.stepOf", "{{current}} of {{total}}", {
-                current: currentStep + 1,
-                total: TOTAL_STEPS,
-              })}
-            </span>
-
-            {!currentQuestion?.required && (
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="flex items-center gap-1 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
-              >
-                {t("questionnaire.skip", "Skip")}
-                <SkipForward className="h-4 w-4" />
-              </button>
-            )}
-            {currentQuestion?.required && <div className="w-16" />}
+              1
+            </div>
+            <div
+              className={cn(
+                "h-1 flex-1 rounded-full transition-all",
+                step >= 2
+                  ? "bg-[image:var(--gradient-main)]"
+                  : "bg-[var(--glass-border)]"
+              )}
+            />
+            <div
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all",
+                step >= 2
+                  ? "bg-[image:var(--gradient-main)] text-white shadow-lg shadow-[var(--color-primary)]/25"
+                  : "bg-[var(--glass-bg)] text-[var(--text-muted)] border border-[var(--glass-border)]"
+              )}
+            >
+              2
+            </div>
           </div>
         </div>
 
-        {/* Social Autofill (shown before first question) */}
-        <AnimatePresence>
-          {showSocialAutofill && currentStep === 0 && (
+        <AnimatePresence mode="wait">
+          {step === 1 && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mx-auto w-full max-w-2xl overflow-hidden px-4 pt-4"
+              key="step1"
+              initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
+              transition={{ duration: 0.25 }}
+              className="mx-auto w-full max-w-lg flex-1 px-4 py-8"
             >
-              <SocialAutofill
-                onComplete={handleSocialAutofillDone}
-                onSkip={() => setShowSocialAutofill(false)}
-              />
+              <div className="mb-8 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                  className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[image:var(--gradient-main)] text-white shadow-lg shadow-[var(--color-primary)]/25"
+                >
+                  <Cake className="h-8 w-8" />
+                </motion.div>
+                <h1 className="text-2xl font-bold text-[var(--text)]">
+                  {t("questionnaire.step1Title", "Who's the birthday star? 🌟")}
+                </h1>
+                <p className="mt-2 text-[var(--text-muted)]">
+                  {t("questionnaire.step1Subtitle", "Just the basics — we'll make it personal in the next step")}
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                {/* Name */}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-[var(--text)]">
+                    {t("questionnaire.nameLabel", "Their name")} *
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={t("questionnaire.namePlaceholder", "e.g., Sarah")}
+                    className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-3 text-[var(--text)] placeholder:text-[var(--text-muted)]/50 focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                    autoFocus
+                  />
+                </div>
+
+                {/* Age */}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-[var(--text)]">
+                    {t("questionnaire.ageLabel", "Age they're turning")}
+                  </label>
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="e.g., 30"
+                    min={1}
+                    max={120}
+                    className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-3 text-[var(--text)] placeholder:text-[var(--text-muted)]/50 focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                  />
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-[var(--text)]">
+                    {t("questionnaire.genderLabel", "Gender")} *
+                  </label>
+                  <div className="flex gap-2">
+                    {GENDER_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setGender(opt.value)}
+                        className={cn(
+                          "flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all",
+                          gender === opt.value
+                            ? "bg-[image:var(--gradient-main)] text-white border-transparent shadow-lg shadow-[var(--color-primary)]/25"
+                            : "bg-[var(--glass-bg)] text-[var(--text)] border-[var(--glass-border)] hover:border-[var(--border)]"
+                        )}
+                      >
+                        {t(`questionnaire.${opt.labelKey}`, opt.fallback)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Relationship */}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-[var(--text)]">
+                    {t("questionnaire.relationshipLabel", "Your relationship")}
+                  </label>
+                  <input
+                    type="text"
+                    value={relationship}
+                    onChange={(e) => setRelationship(e.target.value)}
+                    placeholder={t("questionnaire.relationshipPlaceholder", "e.g., Best friend, sister, mom...")}
+                    className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-3 text-[var(--text)] placeholder:text-[var(--text-muted)]/50 focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all"
+                  />
+                </div>
+
+                {/* Tone */}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-[var(--text)]">
+                    {t("questionnaire.toneLabel", "Song vibe")}
+                  </label>
+                  <div className="flex gap-2">
+                    {TONE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setTone(opt.value)}
+                        className={cn(
+                          "flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all flex items-center justify-center gap-1.5",
+                          tone === opt.value
+                            ? "bg-[image:var(--gradient-main)] text-white border-transparent shadow-lg shadow-[var(--color-primary)]/25"
+                            : "bg-[var(--glass-bg)] text-[var(--text)] border-[var(--glass-border)] hover:border-[var(--border)]"
+                        )}
+                      >
+                        <span>{opt.emoji}</span>
+                        <span>{t(`questionnaire.${opt.labelKey}`, opt.fallback)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Next button */}
+              <div className="mt-8">
+                <Button
+                  size="lg"
+                  onClick={() => setStep(2)}
+                  disabled={!canProceed}
+                  icon={<ArrowRight className="h-5 w-5" />}
+                  iconPosition="right"
+                  className="w-full py-4 text-base font-bold"
+                >
+                  {t("questionnaire.next", "Next — Make It Personal")}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
+              transition={{ duration: 0.25 }}
+              className="mx-auto w-full max-w-lg flex-1 px-4 py-8"
+            >
+              <div className="mb-6 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                  className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[image:var(--gradient-main)] text-white shadow-lg shadow-[var(--color-primary)]/25"
+                >
+                  <Sparkles className="h-8 w-8" />
+                </motion.div>
+                <h1 className="text-2xl font-bold text-[var(--text)]">
+                  {t("questionnaire.step2Title", "Tell us about {{name}}", { name: name.trim() || "them" })}
+                </h1>
+                <p className="mt-2 text-[var(--text-muted)]">
+                  {t("questionnaire.step2Subtitle", "Write anything you want — the more details, the better the song! Tap a topic for inspiration 👇")}
+                </p>
+              </div>
+
+              {/* Suggestion chips */}
+              <div className="mb-4 flex flex-wrap gap-2 justify-center">
+                {SUGGESTION_CHIPS.map((chip, index) => {
+                  const Icon = chip.icon;
+                  return (
+                    <motion.button
+                      key={index}
+                      type="button"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleChipClick(index, chip.placeholder)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                        activeChip === index
+                          ? "bg-[image:var(--gradient-main)] text-white border-transparent shadow-md"
+                          : "bg-[var(--glass-bg)] text-[var(--text-muted)] border-[var(--glass-border)] hover:border-[var(--border)] hover:text-[var(--text)]"
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {t(`questionnaire.${chip.labelKey}`, chip.fallback)}
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              {/* Free text area */}
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={freeText}
+                  onChange={(e) => setFreeText(e.target.value)}
+                  placeholder={
+                    activeChip !== null
+                      ? SUGGESTION_CHIPS[activeChip].placeholder
+                      : t("questionnaire.freeTextPlaceholder", "Write whatever comes to mind... their personality, funny stories, hobbies, inside jokes, what makes them special...")
+                  }
+                  rows={6}
+                  className="w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-3 text-[var(--text)] placeholder:text-[var(--text-muted)]/50 focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all resize-none"
+                />
+                <div className="absolute bottom-3 end-3 text-xs text-[var(--text-muted)]">
+                  {freeText.length > 0 && `${freeText.length}/1000`}
+                </div>
+              </div>
+
+              <p className="mt-2 text-center text-xs text-[var(--text-muted)]">
+                {t("questionnaire.freeTextHint", "💡 This is optional but makes the song WAY more personal")}
+              </p>
+
+              {/* Error */}
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 text-center text-sm text-red-500"
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              {/* Actions */}
+              <div className="mt-6 flex gap-3">
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => setStep(1)}
+                  className="px-6"
+                >
+                  {t("questionnaire.back", "Back")}
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={handleSubmit}
+                  loading={submitting}
+                  icon={<Sparkles className="h-5 w-5" />}
+                  iconPosition="right"
+                  className="flex-1 py-4 text-base font-bold"
+                >
+                  {t("questionnaire.createSong", "Create Song ✨")}
+                </Button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Chat Area */}
-        <div
-          ref={chatContainerRef}
-          className="flex-1 overflow-y-auto px-4 py-6"
-        >
-          <div className="mx-auto flex max-w-2xl flex-col gap-4">
-            {/* Welcome message */}
-            <ChatBubble type="ai" animate={false}>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[var(--color-primary)]" />
-                <span className="font-semibold">
-                  {t(
-                    "questionnaire.welcome",
-                    "Hi! I'll help you create the perfect birthday song. Let's get started!"
-                  )}
-                </span>
-              </div>
-            </ChatBubble>
-
-            {/* Chat messages */}
-            <AnimatePresence mode="popLayout">
-              {messages.map((msg) => (
-                <ChatBubble
-                  key={msg.id}
-                  type={msg.type}
-                  animate={msg.animate}
-                >
-                  {msg.content}
-                </ChatBubble>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Input Area */}
-        <div className="sticky bottom-0 border-t border-[var(--glass-border)] bg-[var(--bg)]/90 backdrop-blur-xl">
-          <div className="mx-auto max-w-2xl px-4 py-4">
-            <AnimatePresence mode="wait">
-              {currentQuestion?.type === "select" && (
-                <motion.div
-                  key={`select-${currentStep}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <RadioGroup
-                    value={
-                      (answers[
-                        currentQuestion.key as keyof QuestionnaireAnswers
-                      ] as string) ?? ""
-                    }
-                    onChange={handleSelectOption}
-                    direction="horizontal"
-                    className="flex-wrap justify-center"
-                  >
-                    {currentQuestion.options?.map((opt) => (
-                      <RadioGroup.Option
-                        key={opt.value}
-                        value={opt.value}
-                        label={opt.label}
-                      />
-                    ))}
-                  </RadioGroup>
-                </motion.div>
-              )}
-
-              {currentQuestion?.type === "multiselect" && (
-                <motion.div
-                  key={`multiselect-${currentStep}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-3"
-                >
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {currentQuestion.options?.map((opt) => {
-                      const isSelected = selectedTraits.includes(opt.value);
-                      return (
-                        <motion.button
-                          key={opt.value}
-                          type="button"
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleTraitToggle(opt.value)}
-                          className={cn(
-                            "rounded-full px-4 py-2 text-sm font-medium transition-all",
-                            "border",
-                            isSelected
-                              ? "bg-[image:var(--gradient-main)] text-white border-transparent shadow-lg shadow-[var(--color-primary)]/25"
-                              : "bg-[var(--glass-bg)] text-[var(--text)] border-[var(--glass-border)] hover:border-[var(--border)]"
-                          )}
-                        >
-                          {opt.label}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {t("questionnaire.traitsSelected", "{{count}}/3 selected", {
-                        count: selectedTraits.length,
-                      })}
-                    </span>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (selectedTraits.length > 0) {
-                          updateAnswer("personalityTraits", selectedTraits);
-                          addUserMessage(selectedTraits.join(", "));
-                          goToNextStep();
-                        }
-                      }}
-                      disabled={selectedTraits.length === 0}
-                      icon={<ArrowRight className="h-4 w-4" />}
-                      iconPosition="right"
-                    >
-                      {t("questionnaire.continue", "Continue")}
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-
-              {(currentQuestion?.type === "text" ||
-                currentQuestion?.type === "number") && (
-                <motion.div
-                  key={`input-${currentStep}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-end gap-3"
-                >
-                  <div className="flex-1">
-                    <Input
-                      ref={inputRef as React.Ref<HTMLInputElement>}
-                      type={currentQuestion.type === "number" ? "number" : "text"}
-                      value={inputValue}
-                      onChange={(e) =>
-                        setInputValue(
-                          (e as React.ChangeEvent<HTMLInputElement>).target.value
-                        )
-                      }
-                      onKeyDown={handleKeyDown}
-                      placeholder={currentQuestion.placeholder}
-                      label={currentQuestion.placeholder}
-                    />
-                  </div>
-                  <Button
-                    size="md"
-                    onClick={() => {
-                      if (isLastStep) {
-                        const value = inputValue.trim();
-                        if (value) {
-                          updateAnswer(currentQuestion.key, value);
-                          addUserMessage(value);
-                        } else {
-                          addUserMessage(
-                            t("questionnaire.skipped", "(skipped)")
-                          );
-                        }
-                        handleComplete();
-                      } else {
-                        handleSubmitAnswer();
-                      }
-                    }}
-                    loading={submitting}
-                    icon={
-                      isLastStep ? (
-                        <Sparkles className="h-4 w-4" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )
-                    }
-                    className="shrink-0"
-                  >
-                    {isLastStep
-                      ? t("questionnaire.finish", "Create Song")
-                      : t("questionnaire.send", "Send")}
-                  </Button>
-                </motion.div>
-              )}
-
-              {currentQuestion?.type === "textarea" && (
-                <motion.div
-                  key={`textarea-${currentStep}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-3"
-                >
-                  <Input
-                    as="textarea"
-                    ref={inputRef as React.Ref<HTMLTextAreaElement>}
-                    value={inputValue}
-                    onChange={(e) =>
-                      setInputValue(
-                        (e as React.ChangeEvent<HTMLTextAreaElement>).target
-                          .value
-                      )
-                    }
-                    onKeyDown={handleKeyDown}
-                    placeholder={currentQuestion.placeholder}
-                    label={currentQuestion.placeholder}
-                    rows={3}
-                  />
-                  <div className="flex justify-end gap-2">
-                    {!currentQuestion.required && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleSkip}
-                        icon={<SkipForward className="h-4 w-4" />}
-                      >
-                        {t("questionnaire.skip", "Skip")}
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (isLastStep) {
-                          const value = inputValue.trim();
-                          if (value) {
-                            updateAnswer(currentQuestion.key, value);
-                            addUserMessage(value);
-                          } else {
-                            addUserMessage(
-                              t("questionnaire.skipped", "(skipped)")
-                            );
-                          }
-                          handleComplete();
-                        } else {
-                          handleSubmitAnswer();
-                        }
-                      }}
-                      loading={submitting}
-                      icon={
-                        isLastStep ? (
-                          <Sparkles className="h-4 w-4" />
-                        ) : (
-                          <Send className="h-4 w-4" />
-                        )
-                      }
-                      iconPosition="right"
-                    >
-                      {isLastStep
-                        ? t("questionnaire.finish", "Create Song")
-                        : t("questionnaire.send", "Send")}
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
       </motion.div>
     </Shell>
   );
