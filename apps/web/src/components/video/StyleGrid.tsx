@@ -1,0 +1,92 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { cn } from "@/lib/cn";
+import { VIDEO_STYLES } from "@birthday-song/shared";
+import { useUIStore } from "@/stores/uiStore";
+
+export interface StyleGridProps {
+  selectedId?: string;
+  onSelect: (id: string) => void;
+}
+
+export function StyleGrid({ selectedId, onSelect }: StyleGridProps) {
+  const language = useUIStore((s) => s.language);
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+      {VIDEO_STYLES.map((style) => {
+        const isSelected = selectedId === style.id;
+        return (
+          <motion.button
+            key={style.id}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03, y: -2 }}
+            onClick={() => onSelect(style.id)}
+            className={cn(
+              "relative flex flex-col items-center gap-2 rounded-2xl p-4",
+              "bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)]",
+              "border transition-all duration-300 cursor-pointer",
+              isSelected
+                ? "border-transparent shadow-xl shadow-[var(--color-primary)]/20"
+                : "border-[var(--glass-border)] shadow-[var(--glass-shadow)] hover:border-[var(--color-primary)]/30"
+            )}
+          >
+            {/* Gradient border overlay when selected */}
+            {isSelected && (
+              <motion.div
+                layoutId="style-grid-selected-border"
+                className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-transparent bg-clip-border [background:var(--gradient-main)] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude] p-[2px]"
+                transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              />
+            )}
+
+            {/* Emoji */}
+            <motion.span
+              className="text-3xl"
+              animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              {style.emoji}
+            </motion.span>
+
+            {/* Name */}
+            <span
+              className={cn(
+                "text-sm font-semibold text-center",
+                isSelected
+                  ? "text-[var(--text)]"
+                  : "text-[var(--text-secondary)]"
+              )}
+            >
+              {language === "he" ? style.nameHe : style.nameEn}
+            </span>
+
+            {/* Selected indicator */}
+            {isSelected && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[image:var(--gradient-main)] shadow-md"
+              >
+                <svg
+                  className="h-3 w-3 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </motion.div>
+            )}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
