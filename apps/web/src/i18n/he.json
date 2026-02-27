@@ -85,7 +85,20 @@
     "next": "הבא — נהפוך לאישי",
     "back": "חזרה",
     "createSong": "ליצור שיר ✨",
-    "error": "משהו השתבש. נסו שוב."
+    "error": "משהו השתבש. נסו שוב.",
+    "social": {
+      "title": "רוצים לדלג? חברו פרופיל",
+      "subtitle": "נמלא את הפרטים אוטומטית",
+      "skip": "למלא ידנית",
+      "connecting": "מביא פרטי פרופיל...",
+      "success": "פרופיל מחובר! בדקו את הפרטים למטה",
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "placeholder": "הכניסו קישור לפרופיל או שם משתמש",
+      "connect": "חיבור"
+    }
   },
   "style": {
     "badge": "שלב 2 מתוך 4",

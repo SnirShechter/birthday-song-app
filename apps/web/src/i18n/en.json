@@ -85,7 +85,20 @@
     "next": "Next — Make It Personal",
     "back": "Back",
     "createSong": "Create Song ✨",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "social": {
+      "title": "Skip the form? Connect a profile",
+      "subtitle": "We'll auto-fill the details",
+      "skip": "Fill manually instead",
+      "connecting": "Getting profile info...",
+      "success": "Profile connected! Review the details below",
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "placeholder": "Enter profile URL or username",
+      "connect": "Connect"
+    }
   },
   "style": {
     "badge": "Step 2 of 4",

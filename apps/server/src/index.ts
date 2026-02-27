@@ -9,6 +9,7 @@ import videoRoutes from './routes/video.js';
 import checkoutRoutes from './routes/checkout.js';
 import shareRoutes from './routes/share.js';
 import adminRoutes from './routes/admin.js';
+import socialRoutes from './routes/social.js';
 
 const app = new Hono();
 
@@ -34,6 +35,7 @@ app.route('/api/orders', videoRoutes);
 app.route('/api/orders', checkoutRoutes);
 app.route('/api/orders', shareRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/social', socialRoutes);
 
 // Webhook routes (separate from /api/orders prefix)
 app.post('/api/webhooks/stripe', async (c) => {

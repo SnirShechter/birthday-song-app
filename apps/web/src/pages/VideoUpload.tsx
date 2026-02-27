@@ -95,9 +95,10 @@ export default function VideoUpload() {
     if (!orderId) return;
 
     try {
-      const status = await api.get<VideoClip>(
+      const res = await api.get<{ success: boolean; video: VideoClip }>(
         `/api/orders/${orderId}/video/status`
       );
+      const status = res.video;
 
       if (status.status === "completed") {
         if (pollIntervalRef.current) {
@@ -136,7 +137,7 @@ export default function VideoUpload() {
 
       await api.post(`/api/orders/${orderId}/video`, {
         videoStyle: selectedStyle,
-        photoCount: photos.length,
+        photoUrls: photos.map((_, i) => `/mock-assets/photos/upload-${i + 1}.jpg`),
       });
 
       // Start polling for completion

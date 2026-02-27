@@ -4,20 +4,16 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ShoppingCart,
-  Music,
   CreditCard,
   Shield,
   ArrowLeft,
 } from "lucide-react";
 import type { Order } from "@birthday-song/shared";
-import { PRICING } from "@birthday-song/shared";
 import { cn } from "@/lib/cn";
 import api from "@/lib/api";
 import { useOrderStore } from "@/stores/order";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Shell } from "@/components/layout/Shell";
-import { TierSelector } from "@/components/checkout/TierSelector";
 import { MockStripe } from "@/components/checkout/MockStripe";
 import { GradientText } from "@/components/shared/GradientText";
 
@@ -30,8 +26,6 @@ const fadeUp = {
   },
 };
 
-type Tier = "song" | "bundle" | "premium";
-
 export default function Checkout() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -41,7 +35,6 @@ export default function Checkout() {
   const lang = i18n.language === "he" ? "he" : "en";
 
   const [order, setOrder] = useState<Order | null>(null);
-  const [selectedTier, setSelectedTier] = useState<Tier>("song");
   const [showStripe, setShowStripe] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -69,40 +62,26 @@ export default function Checkout() {
     };
   }, [orderId]);
 
-  const handleProceed = useCallback(() => {
-    setShowStripe(true);
-  }, []);
-
   const handlePaymentSuccess = useCallback(async () => {
     if (!orderId) return;
     setProcessing(true);
 
     try {
-      // Step 1: Create checkout session on the server
       const checkoutRes = await api.post<{
         success: boolean;
         sessionId: string;
         checkoutUrl: string;
-      }>(`/api/orders/${orderId}/checkout`, { tier: selectedTier });
+      }>(`/api/orders/${orderId}/checkout`, { tier: "song" });
 
-      // Step 2: Complete the mock payment via webhook
       await api.post("/api/webhooks/stripe", {
         sessionId: checkoutRes.sessionId,
       });
 
-      navigate(`/success?orderId=${orderId}&tier=${selectedTier}`);
+      navigate(`/success?orderId=${orderId}&tier=song`);
     } catch {
       setProcessing(false);
-      setShowStripe(false);
     }
-  }, [orderId, selectedTier, navigate]);
-
-  const handlePaymentCancel = useCallback(() => {
-    setShowStripe(false);
-  }, []);
-
-  const tierPricing = PRICING[selectedTier];
-  const formattedPrice = `$${(tierPricing.amountCents / 100).toFixed(2)}`;
+  }, [orderId, navigate]);
 
   if (fetching) {
     return (
@@ -121,7 +100,7 @@ export default function Checkout() {
               <ShoppingCart className="h-6 w-6 text-white" />
             </motion.div>
             <p className="text-[var(--text-muted)]">
-              {t("checkout.loading", "Loading checkout...")}
+              {t("checkout.loading", "Processing...")}
             </p>
           </motion.div>
         </div>
@@ -138,7 +117,7 @@ export default function Checkout() {
         transition={{ duration: 0.3 }}
         className="min-h-screen px-4 py-12"
       >
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-md">
           {/* Back button */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
@@ -151,7 +130,7 @@ export default function Checkout() {
               className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
             >
               <ArrowLeft className="h-4 w-4" />
-              {t("checkout.back", "Back to preview")}
+              {t("checkout.back", "Back")}
             </button>
           </motion.div>
 
@@ -160,132 +139,135 @@ export default function Checkout() {
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="mb-10 text-center"
+            className="mb-8 text-center"
           >
             <GradientText
               as="h1"
               className="mb-3 text-3xl font-extrabold sm:text-4xl"
             >
-              {t("checkout.title", "Complete Your Order")}
+              {t("checkout.title", "Get the Full Song")}
             </GradientText>
-            <p className="text-[var(--text-muted)]">
-              {t(
-                "checkout.subtitle",
-                "Choose your plan and unlock the full experience"
-              )}
-            </p>
+            <div className="mt-2">
+              <GradientText as="span" className="text-4xl font-extrabold">
+                $9.99
+              </GradientText>
+            </div>
           </motion.div>
 
-          <div className="grid gap-8 lg:grid-cols-5">
-            {/* Tier Selector - left/main area */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-3"
+          {/* Payment buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-3"
+          >
+            {/* Google Pay */}
+            <button
+              type="button"
+              onClick={handlePaymentSuccess}
+              disabled={processing}
+              className={cn(
+                "flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--glass-border)] bg-black px-6 py-4 text-base font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+              )}
             >
-              <TierSelector
-                selectedTier={selectedTier}
-                onSelect={(tier: string) => setSelectedTier(tier as Tier)}
-              />
-            </motion.div>
+              {t("checkout.googlePay", "Pay with Google Pay")}
+            </button>
 
-            {/* Order summary - sidebar */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-2"
+            {/* Apple Pay */}
+            <button
+              type="button"
+              onClick={handlePaymentSuccess}
+              disabled={processing}
+              className={cn(
+                "flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--glass-border)] bg-black px-6 py-4 text-base font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+              )}
             >
-              <Card hoverable={false} className="sticky top-24">
-                <CardHeader>
-                  <CardTitle>
-                    {t("checkout.summary.title", "Order Summary")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Order info */}
-                  <div className="space-y-2">
-                    {order?.recipientName && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[var(--text-muted)]">
-                          {t("checkout.summary.recipient", "For")}
-                        </span>
-                        <span className="text-sm font-semibold text-[var(--text)]">
-                          {order.recipientName}
-                        </span>
-                      </div>
-                    )}
-                    {order?.selectedStyle && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[var(--text-muted)]">
-                          {t("checkout.summary.style", "Style")}
-                        </span>
-                        <span className="text-sm font-semibold capitalize text-[var(--text)]">
-                          {order.selectedStyle}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[var(--text-muted)]">
-                        {t("checkout.summary.plan", "Plan")}
-                      </span>
-                      <span className="text-sm font-semibold text-[var(--text)]">
-                        {lang === "he"
-                          ? tierPricing.labelHe
-                          : tierPricing.label}
-                      </span>
-                    </div>
-                  </div>
+              {t("checkout.applePay", "Pay with Apple Pay")}
+            </button>
 
-                  <div className="border-t border-[var(--glass-border)] pt-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-base font-bold text-[var(--text)]">
-                        {t("checkout.summary.total", "Total")}
-                      </span>
-                      <GradientText
-                        as="span"
-                        className="text-2xl font-extrabold"
-                      >
-                        {formattedPrice}
-                      </GradientText>
-                    </div>
-                  </div>
+            {/* PayPal */}
+            <button
+              type="button"
+              onClick={handlePaymentSuccess}
+              disabled={processing}
+              className={cn(
+                "flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--glass-border)] bg-[#0070ba] px-6 py-4 text-base font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+              )}
+            >
+              {t("checkout.paypal", "Pay with PayPal")}
+            </button>
+          </motion.div>
 
-                  {/* CTA */}
-                  <Button
-                    size="lg"
-                    onClick={handleProceed}
-                    loading={processing}
-                    icon={<CreditCard className="h-5 w-5" />}
-                    className="w-full"
-                  >
-                    {t("checkout.proceed", "Proceed to Payment")}
-                  </Button>
+          {/* Order summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-8 rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-5"
+          >
+            <h3 className="mb-3 text-sm font-bold text-[var(--text)]">
+              {t("checkout.summary.title", "Order Summary")}
+            </h3>
+            <div className="space-y-2">
+              {order?.recipientName && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--text-muted)]">
+                    {t("checkout.summary.recipient", "For")}
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--text)]">
+                    {order.recipientName}
+                  </span>
+                </div>
+              )}
+              {order?.selectedStyle && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--text-muted)]">
+                    {t("checkout.summary.style", "Style")}
+                  </span>
+                  <span className="text-sm font-semibold capitalize text-[var(--text)]">
+                    {order.selectedStyle}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between border-t border-[var(--glass-border)] pt-2">
+                <span className="text-sm font-bold text-[var(--text)]">
+                  {t("checkout.summary.total", "Total")}
+                </span>
+                <GradientText as="span" className="text-xl font-extrabold">
+                  $9.99
+                </GradientText>
+              </div>
+            </div>
+          </motion.div>
 
-                  {/* Trust badge */}
-                  <div className="flex items-center justify-center gap-2 pt-2">
-                    <Shield className="h-4 w-4 text-green-400" />
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {t(
-                        "checkout.secure",
-                        "Secure payment. Satisfaction guaranteed."
-                      )}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+          {/* Credit card link */}
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={() => setShowStripe(true)}
+              className="text-sm font-medium text-[var(--text-muted)] underline transition-colors hover:text-[var(--text)]"
+            >
+              <CreditCard className="mr-1 inline h-4 w-4" />
+              {t("checkout.payWith", "Pay with credit card")}
+            </button>
+          </div>
+
+          {/* Trust badge */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <Shield className="h-4 w-4 text-green-400" />
+            <span className="text-xs text-[var(--text-muted)]">
+              {t("checkout.secure", "Secure payment. Satisfaction guaranteed.")}
+            </span>
           </div>
         </div>
 
         {/* Mock Stripe overlay */}
         <MockStripe
           isOpen={showStripe}
-          onClose={handlePaymentCancel}
+          onClose={() => setShowStripe(false)}
           onSuccess={handlePaymentSuccess}
-          amount={tierPricing.amountCents}
-          itemLabel={lang === "he" ? tierPricing.labelHe : tierPricing.label}
+          amount={999}
+          itemLabel={lang === "he" ? "שיר בלבד" : "Song Only"}
         />
       </motion.div>
     </Shell>
